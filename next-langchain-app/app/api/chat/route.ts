@@ -102,7 +102,8 @@ export async function POST(req: Request) {
 	//FUNCTION TO GET NBA PLAYER STATS
 	const fetchNBAGames = new DynamicStructuredTool({
 		name: "fetchNBAGames",
-		description: "Fetches a list of NBA Games played on a specific date",
+		description:
+			"Fetches a list of NBA Games played on a specific date. You can match the team to the game by the id ",
 		//TS VALIDATION FOR ARGS OPTIONS
 		schema: z.object({
 			date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -157,7 +158,7 @@ export async function POST(req: Request) {
 			const data = await response.json();
 			console.log("got data back");
 			console.log(data);
-			return data.toString();
+			return data.data;
 
 			//PARSING THE RESPONSE USING OUR ARGS TO RETURN TO USER
 		},
@@ -211,3 +212,4 @@ export async function POST(req: Request) {
 //NEED TO CREATE SEPARATE TOOLS FOR EACH ENDPOINT
 //NEED TO USE MESSAGES ARRAY INSTEAD OF JUST LAST MESSAGE
 //ALSO USE LANGCHAINSTREAM AND MESSAGE FROM AI
+//NEED TO PARSE THE GAMEID FROM THE INCOMING DATA TO MATCH THE TEAMS TO THE GAMES
