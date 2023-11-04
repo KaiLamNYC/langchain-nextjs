@@ -207,3 +207,7 @@ export async function POST(req: Request) {
 	// return new StreamingTextResponse(stream);
 	//https://sdk.vercel.ai/docs/api-reference/langchain-stream#langchainstream
 }
+
+//NEED TO CREATE SEPARATE TOOLS FOR EACH ENDPOINT
+//NEED TO USE MESSAGES ARRAY INSTEAD OF JUST LAST MESSAGE
+//ALSO USE LANGCHAINSTREAM AND MESSAGE FROM AI
