@@ -92,77 +92,79 @@ export async function POST(req: Request) {
 	});
 
 	//HELPER SCHEMA FOR DATE VALIDATION
-	const DateSchema = z
-		.string()
-		.regex(/^\d{4}-\d{2}-\d{2}$/)
-		.refine((date) => /^\d{4}-\d{2}-\d{2}$/.test(date), {
-			message: "Date must be in YYYY-MM-DD format",
-		});
+	// const DateSchema = z
+	// 	.string()
+	// 	.regex(/^\d{4}-\d{2}-\d{2}$/)
+	// 	.refine((date) => /^\d{4}-\d{2}-\d{2}$/.test(date), {
+	// 		message: "Date must be in YYYY-MM-DD format",
+	// 	});
 
 	//FUNCTION TO GET NBA PLAYER STATS
-	const fetchNBAStats = new DynamicStructuredTool({
-		name: "fetchNBAStats",
-		description: "Fetches stats for NBA games",
+	const fetchNBAGames = new DynamicStructuredTool({
+		name: "fetchNBAGames",
+		description: "Fetches a list of NBA Games played on a specific date",
 		//TS VALIDATION FOR ARGS OPTIONS
 		schema: z.object({
-			dates: z.array(DateSchema).optional(),
-			seasons: z.array(z.string()).optional(),
-			player_ids: z.array(z.number()).optional(),
-			game_ids: z.array(z.number()).optional(),
-			postseason: z.boolean().optional(),
-			start_date: DateSchema.optional(),
-			end_date: DateSchema.optional(),
+			date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+			// seasons: z.array(z.string()).optional(),
+			// player_ids: z.array(z.number()).optional(),
+			// game_ids: z.array(z.number()).optional(),
+			// postseason: z.boolean().optional(),
+			// start_date: DateSchema.optional(),
+			// end_date: DateSchema.optional(),
 		}),
 		func: async (options) => {
 			//LOGGING THE ARGS
 			console.log("fetching nba stats", options);
 
-			function toQueryString(params: any) {
-				return Object.keys(params)
-					.map((key) => {
-						const value = params[key];
-						if (Array.isArray(value)) {
-							// Handle array values by suffixing the key with []
-							return value
-								.map(
-									(item) =>
-										`${encodeURIComponent(key)}[]=${encodeURIComponent(item)}`
-								)
-								.join("&");
-						}
-						// Handle non-array values normally
-						return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-					})
-					.join("&");
-			}
+			// function toQueryString(params: any) {
+			// 	return Object.keys(params)
+			// 		.map((key) => {
+			// 			const value = params[key];
+			// 			if (Array.isArray(value)) {
+			// 				// Handle array values by suffixing the key with []
+			// 				return value
+			// 					.map(
+			// 						(item) =>
+			// 							`${encodeURIComponent(key)}[]=${encodeURIComponent(item)}`
+			// 					)
+			// 					.join("&");
+			// 			}
+			// 			// Handle non-array values normally
+			// 			return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+			// 		})
+			// 		.join("&");
+			// }
 
-			const queryParams = {
-				dates: options.dates || [],
-				seasons: options.seasons || [],
-				player_ids: options.player_ids || [],
-				game_ids: options.game_ids || [],
-				postseason: options.postseason || false,
-				start_date: options.start_date || "",
-				end_date: options.end_date || "",
-			};
+			// const queryParams = {
+			// 	dates: options.dates || [],
+			// 	seasons: options.seasons || [],
+			// 	player_ids: options.player_ids || [],
+			// 	game_ids: options.game_ids || [],
+			// 	postseason: options.postseason || false,
+			// 	start_date: options.start_date || "",
+			// 	end_date: options.end_date || "",
+			// };
 
 			// Serialize queryParams to a query string
-			const queryString = toQueryString(queryParams);
-
-			const url = `https://www.balldontlie.io/api/v1/stats?${queryString}`;
+			// const queryString = toQueryString(queryParams);
+			// console.log(queryString);
+			const { date } = options;
+			const url = `https://www.balldontlie.io/api/v1/games?dates[]=${date}`;
 
 			const response = await fetch(url);
 			//RESPONSE DATA
 			const data = await response.json();
-
-			return data;
+			console.log("got data back");
+			console.log(data);
+			return data.toString();
 
 			//PARSING THE RESPONSE USING OUR ARGS TO RETURN TO USER
 		},
 	});
 
 	// 9. List all the tools that will be used by the agent during execution
-	const tools = [WikipediaQuery, oneShot, fetchCryptoPrice, fetchNBAStats];
+	const tools = [WikipediaQuery, oneShot, fetchCryptoPrice, fetchNBAGames];
 
 	// 10. Initialize the agent executor, which will use the specified tools and model to process input
 	//https://js.langchain.com/docs/api/agents/functions/initializeAgentExecutorWithOptions
